@@ -1,19 +1,9 @@
-"""
- * ************************
- *	HC-Portfolio Simon Szulik SS 2024
- *
- *      Fourieranalyse und
- *      Speicherverwaltung
- *
- * ************************
-"""
-
 import argparse
 import numpy as np
 import scipy.io.wavfile as wav
 import matplotlib.pyplot as plt
 from scipy.fftpack import fft
-from memory_profiler import profile
+from memory_profiler import memory_usage
 
 """
  * ***** Einlesen der Audio-Datei ***** *
@@ -30,7 +20,6 @@ def read_wav_file(filename):
 """
 
 
-@profile
 def perform_fft_pos(data, block_size, sample_rate):
     num_blocks = len(data) // block_size
     frequencies = np.fft.fftfreq(block_size, 1 / sample_rate)
@@ -50,7 +39,6 @@ def perform_fft_pos(data, block_size, sample_rate):
 """
 
 
-@profile
 def perform_fft(data, block_size, sample_rate):
     num_blocks = len(data) // block_size
     frequencies = np.fft.fftfreq(block_size, 1 / sample_rate)
@@ -69,7 +57,6 @@ def perform_fft(data, block_size, sample_rate):
 """
 
 
-@profile
 def plot_spectrogram(fft_blocks, frequencies, sample_rate, block_size):
     time_bins = np.arange(fft_blocks.shape[0]) * (block_size / sample_rate)
     plt.imshow(20 * np.log10(fft_blocks.T + 1e-10),
@@ -87,7 +74,6 @@ def plot_spectrogram(fft_blocks, frequencies, sample_rate, block_size):
 """
 
 
-@profile
 def plot_frequencies_amplitudes(fft_blocks, frequencies):
     avg_magnitudes = np.mean(fft_blocks, axis=0)
 
@@ -96,6 +82,21 @@ def plot_frequencies_amplitudes(fft_blocks, frequencies):
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('Amplitude')
     plt.title('Frequency Amplitude Spectrum')
+    plt.grid(True)
+    plt.show()
+
+
+""" 
+ * ***** Speicherverbrauch plotten ***** *
+"""
+
+
+def plot_memory_usage(memory_data):
+    plt.figure(figsize=(10, 6))
+    plt.plot(memory_data)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Memory Usage (MiB)')
+    plt.title('Memory Usage Over Time')
     plt.grid(True)
     plt.show()
 
@@ -125,14 +126,18 @@ def main():
         data = data[:, 0]  # Take only one channel if stereo
 
     if args.p == "1":
+        memory_data = memory_usage((perform_fft_pos, (data, args.b, sample_rate)), interval=0.1)
         fft_blocks, frequencies = perform_fft_pos(data, args.b, sample_rate)
     else:
+        memory_data = memory_usage((perform_fft, (data, args.b, sample_rate)), interval=0.1)
         fft_blocks, frequencies = perform_fft(data, args.b, sample_rate)
 
     if args.o == 's':
         plot_spectrogram(fft_blocks, frequencies, sample_rate, args.b)
     elif args.o == 'f':
         plot_frequencies_amplitudes(fft_blocks, frequencies)
+
+    plot_memory_usage(memory_data)
 
 
 if __name__ == "__main__":
