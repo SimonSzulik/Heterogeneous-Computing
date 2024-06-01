@@ -21,15 +21,26 @@ def read_wav_file(filename):
 
 
 def perform_fft_pos(data, block_size, sample_rate):
-    num_blocks = len(data) // block_size
+    """ Blöcke in nicht überschneidenden Teilen berechnen """
+    # num_blocks = len(data) // block_size
+    """ Blöcke mit Schrittweite 1 berechnen """
+    num_blocks = len(data) - block_size + 1
+
     frequencies = np.fft.fftfreq(block_size, 1 / sample_rate)
     positive_frequencies = frequencies[:block_size // 2]
     fft_blocks = []
 
+    """ Blöcke mit Schrittweite 1 berechnen """
     for i in range(num_blocks):
-        block_data = data[i * block_size:(i + 1) * block_size]
+        block_data = data[i:i + block_size]
         fft_block = fft(block_data)
         fft_blocks.append(np.abs(fft_block)[:block_size // 2])
+
+    """ Blöcke in nicht überschneidenden Teilen berechnen """
+    # for i in range(num_blocks):
+    #    block_data = data[i * block_size:(i + 1) * block_size]
+    #    fft_block = fft(block_data)
+    #    fft_blocks.append(np.abs(fft_block)[:block_size // 2])
 
     return np.array(fft_blocks), positive_frequencies
 
@@ -40,14 +51,24 @@ def perform_fft_pos(data, block_size, sample_rate):
 
 
 def perform_fft(data, block_size, sample_rate):
-    num_blocks = len(data) // block_size
+    """ Blöcke in nicht überschneidenden Teilen berechnen """
+    # num_blocks = len(data) // block_size
+    """ Blöcke mit Schrittweite 1 berechnen """
+    num_blocks = len(data) - block_size + 1
     frequencies = np.fft.fftfreq(block_size, 1 / sample_rate)
     fft_blocks = []
 
+    """ Blöcke mit Schrittweite 1 berechnen """
     for i in range(num_blocks):
-        block_data = data[i * block_size:(i + 1) * block_size]
+        block_data = data[i:i + block_size]
         fft_block = fft(block_data)
-        fft_blocks.append(np.abs(fft_block))
+        fft_blocks.append(np.abs(fft_block)[:block_size // 2])
+
+    """ Blöcke in nicht überschneidenden Teilen berechnen """
+    # for i in range(num_blocks):
+    #    block_data = data[i * block_size:(i + 1) * block_size]
+    #    fft_block = fft(block_data)
+    #    fft_blocks.append(np.abs(fft_block))
 
     return np.array(fft_blocks), frequencies
 
