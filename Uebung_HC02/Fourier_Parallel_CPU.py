@@ -39,6 +39,7 @@ def perform_fft(data, block_size, offset, sample_rate):
         fft_blocks = pool.starmap(perform_fft_block, [(block, sample_rate) for block in blocks])
 
     frequencies = np.fft.fftfreq(block_size, 1 / sample_rate)[:block_size // 2]
+
     return np.array(fft_blocks), frequencies
 
 
